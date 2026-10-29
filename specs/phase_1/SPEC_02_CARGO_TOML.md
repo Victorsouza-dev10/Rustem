@@ -16,14 +16,14 @@ Criar o `Cargo.toml` completo com todas as dependências necessárias para o pro
 
 ```toml
 [package]
-name = "stem-separator"
+name = "Rustem"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 license = "MIT OR Apache-2.0"
-description = "Audio stem separator using HTDemucs ONNX models"
-repository = "https://github.com/user/stem-separator"
-authors = ["User <user@example.com>"]
-keywords = ["audio", "stem-separation", "demucs", "onnx", "dsp"]
+description = "Separador de audio usando modelos HTDemucs ONNX"
+repository = "https://github.com/Victorsouza-dev10/Rustem.git"
+authors = ["Victorsouza-dev10 <victorsouza-dev10@users.noreply.github.com>"]
+keywords = ["Rustem", "audio", "stem-separation", "demucs", "onnx", "dsp"]
 categories = ["audio", "command-line-utilities", "machine-learning"]
 
 [dependencies]

@@ -1,0 +1,179 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+
+jobs:
+  # =========================================================================
+  # Check: Format, Clippy, Build
+  # =========================================================================
+  check:
+    name: Check (fmt, clippy, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: "${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}"
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Check clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Build
+        run: cargo build --all-features
+
+  # =========================================================================
+  # Test: Unit and Integration Tests
+  # =========================================================================
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: "${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}"
+
+      - name: Run unit tests
+        run: cargo test --all-features --lib
+
+      - name: Run integration tests
+        run: cargo test --all-features --test integration_tests
+
+      - name: Run doc tests
+        run: cargo test --all-features --doc
+
+  # =========================================================================
+  # Bench: Performance Benchmarks
+  # =========================================================================
+  bench:
+    name: Benchmarks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: "${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}"
+
+      - name: Run benchmarks (dry-run)
+        run: cargo bench --all-features -- --no-run
+
+  # =========================================================================
+  # Docs: Documentation Generation
+  # =========================================================================
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: "${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}"
+
+      - name: Generate docs
+        run: cargo doc --all-features --no-deps --document-private-items
+
+      - name: Check for broken links
+        run: |
+          # Check for broken intra-doc links
+          cargo doc --all-features --no-deps 2>&1 | grep -i "warning.*unresolved" && exit 1 || true
+
+  # =========================================================================
+  # Security: Audit Dependencies
+  # =========================================================================
+  audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install cargo-audit
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: cargo-audit
+
+      - name: Run security audit
+        run: cargo audit --deny warnings
+
+  # =========================================================================
+  # Release: Build Release Artifacts (on tags)
+  # =========================================================================
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [check, test]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build release
+        run: cargo build --release --all-features
+
+      - name: Strip binary
+        run: strip target/release/stem-separator
+
+      - name: Create release archive
+        run: |
+          mkdir -p release
+          cp target/release/stem-separator release/
+          cd release
+          tar -czf stem-separator-${{ github.ref_name }}-${{ runner.os }}-${{ runner.arch }}.tar.gz stem-separator
+
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release/*.tar.gz
+          draft: false
+          prerelease: false

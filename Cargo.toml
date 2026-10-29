@@ -2,19 +2,65 @@
 name = "Rustem"
 version = "0.1.0"
 edition = "2024"
-license = " "
+license = "MIT OR Apache-2.0"
 description = "Separador de audio usando modelos HTDemucs ONNX"
 repository = "https://github.com/Victorsouza-dev10/Rustem.git"
-authors = ["User <Victorsouza-dev10>"]
+authors = ["Victorsouza-dev10 <victorsouza-dev10@users.noreply.github.com>"]
 keywords = ["Rustem", "audio", "stem-separation", "demucs", "onnx", "dsp"]
 categories = ["audio", "command-line-utilities", "machine-learning"]
+
+[dependencies]
+# Audio I/O
+hound = "3.5"
+lewton = "0.10"
+mp3lame-encoder = "0.2"
+symphonia = { version = "0.5", features = ["default"] }
+flac = "0.3"
+
+# DSP / Signal Processing
+ruststft = "0.4"
+rubato = "0.15"
+realfft = "3.5"
+num-complex = "0.4"
+ndarray = { version = "0.16", features = ["blas"] }
+
+# ML / ONNX
+ort = { version = "2.0.0-rc.15", features = ["load-dynamic"] }
+
+# CLI
+clap = { version = "4.5", features = ["derive", "env"] }
+anyhow = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# Utilities
+rayon = "1.10"
+tempfile = "3.8"
+walkdir = "2.5"
+indicatif = "0.17"
+thiserror = "2.0"
+tokio = { version = "1.0", features = ["fs", "sync"] }
+rand = "0.8"
+num_cpus = "1.16"
+reqwest = { version = "0.12", features = ["json"] }
+
+[features]
+default = []
+cuda = ["ort/cuda"]
+coreml = ["ort/coreml"]
 
 [profile.release]
 opt-level = 3
 lto = true
 codegen-units = 1
+strip = true
 
 [profile.bench]
 debug = true
 
-[dependencies]
+[workspace]

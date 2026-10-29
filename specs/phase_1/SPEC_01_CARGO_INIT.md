@@ -15,7 +15,7 @@ Inicializar o projeto Rust com `cargo init` configurado corretamente.
 
 ```bash
 cd E:\Rustem
-cargo init --name Rustem --edition 2026
+cargo init --name Rustem --edition 2024
 ```
 
 ---
@@ -41,11 +41,11 @@ Rustem/
 [package]
 name = "Rustem"
 version = "0.1.0"
-edition = "2026"
-license = " "
+edition = "2024"
+license = "MIT OR Apache-2.0"
 description = "Separador de audio usando modelos HTDemucs ONNX"
 repository = "https://github.com/Victorsouza-dev10/Rustem.git"
-authors = ["User <Victorsouza-dev10>"]
+authors = ["Victorsouza-dev10 <victorsouza-dev10@users.noreply.github.com>"]
 keywords = ["Rustem", "audio", "stem-separation", "demucs", "onnx", "dsp"]
 categories = ["audio", "command-line-utilities", "machine-learning"]
 
@@ -66,14 +66,14 @@ debug = true
 |----|----------|-------------|
 | AC-01.1 | Projeto criado | `ls Cargo.toml src/main.rs src/lib.rs` |
 | AC-01.2 | Nome correto | `grep 'name = "Rustem"' Cargo.toml` |
-| AC-01.3 | Edition 2026 | `grep 'edition = "2026"' Cargo.toml` |
+| AC-01.3 | Edition 2024 | `grep 'edition = "2024"' Cargo.toml` |
 | AC-01.5 | Compila | `cargo check` sem erros |
 
 ---
 
 ## Checklist
 
-- [ ] `cargo init --name Rustem edicao 2026`
+- [ ] `cargo init --name Rustem --edition 2024`
 - [ ] Verificar estrutura criada
 - [ ] `cargo check` passa
 - [ ] Commit inicial: `git init && git add . && git commit -m "chore: init Rustem projeto"`
